@@ -481,11 +481,14 @@ async function submitLetter() {
 
   try {
     const letter = await window.LetterStore.addLetter({ sender, title, message });
-    allLetters.push(letter);
-    state.pool.push(letter.id);
-    saveState();
-    updateProgress();
-    el.btnDraw.disabled = false;
+    // โหมด local ต้องอัปเดตเอง (โหมด cloud ตัว realtime listener จัดการให้)
+    if (!window.LetterStore.subscribe) {
+      allLetters.push(letter);
+      state.pool.push(letter.id);
+      saveState();
+      updateProgress();
+      el.btnDraw.disabled = false;
+    }
 
     el.wSender.value = "";
     el.wTitle.value = "";
@@ -537,41 +540,86 @@ el.btnSubmitLetter.addEventListener("click", submitLetter);
    ================================================================ */
 updateSoundBtn();
 
-function withTimeout(promise, ms) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error("หมดเวลาเชื่อมต่อ")), ms)),
-  ]);
-}
-
-async function boot() {
-  try {
-    allLetters = await withTimeout(window.LetterStore.loadLetters(), 10000);
-  } catch (e) {
-    console.error("โหลดจดหมายไม่สำเร็จ:", e);
-    // คลาวด์ล่ม/ยังตั้งค่าไม่เสร็จ → ถอยไปโหมดเก็บในเครื่อง เว็บจะได้ไม่ค้าง
-    if (window.LetterStore.mode === "cloud" && window.LetterStoreLocal) {
-      window.LetterStore = window.LetterStoreLocal;
-      allLetters = await window.LetterStore.loadLetters();
-      showToast("เชื่อมต่อคลาวด์ไม่สำเร็จ — ใช้โหมดเก็บในเครื่องชั่วคราว");
-    } else {
-      allLetters = [];
-    }
-  }
-
-  state = loadState();
+/* อัปเดตหน้าจอทุกครั้งที่รายชื่อจดหมายเปลี่ยน (โหลดครั้งแรก / realtime) */
+function afterLettersLoaded(isFirst) {
+  if (isFirst) state = loadState();
   syncStateWithLetters();
   updateProgress();
 
   if (window.LetterStore.mode === "local") {
     el.modeNote.classList.remove("hidden");
+  } else {
+    el.modeNote.classList.add("hidden");
   }
 
   if (allLetters.length === 0) {
+    el.btnDraw.disabled = true;
     el.progress.textContent = "ตู้ยังว่างอยู่ — เป็นคนแรกที่เขียนจดหมายสิ ✍️";
   } else {
     el.btnDraw.disabled = false;
   }
+
+  // สมุดสะสมเปิดค้างอยู่ → วาดใหม่ให้เห็นของใหม่ทันที
+  if (!el.sceneCollection.classList.contains("hidden")) renderCollection();
+}
+
+async function fallbackToLocal() {
+  window.LetterStore = window.LetterStoreLocal;
+  allLetters = await window.LetterStore.loadLetters();
+  afterLettersLoaded(true);
+  showToast("เชื่อมต่อคลาวด์ไม่สำเร็จ — ใช้โหมดเก็บในเครื่องชั่วคราว");
+}
+
+/* โหมด cloud: ฟัง Firestore แบบ realtime — ใครหย่อนจดหมายก็เห็นทันที */
+function bootRealtime() {
+  const cloudStore = window.LetterStore;
+  let first = true;
+  let gotData = false;
+
+  // กันค้าง: 10 วิแรกยังไม่มีข้อมูล → ถอยไปโหมดเก็บในเครื่องก่อน
+  const fallbackTimer = setTimeout(() => {
+    if (!gotData && window.LetterStoreLocal) fallbackToLocal();
+  }, 10000);
+
+  cloudStore.subscribe(
+    (letters, serverAdds) => {
+      gotData = true;
+      clearTimeout(fallbackTimer);
+      window.LetterStore = cloudStore; // เผื่อเคยถอยไป local แล้วคลาวด์ฟื้น
+      allLetters = letters;
+      const isFirst = first;
+      first = false;
+      afterLettersLoaded(isFirst);
+
+      // มีจดหมายใหม่จากคนอื่นเข้ามาสด ๆ
+      if (!isFirst && serverAdds > 0) {
+        showToast("📮 มีจดหมายใหม่ถูกหย่อนลงตู้!");
+        el.mailbox.classList.add("shaking");
+        setTimeout(() => el.mailbox.classList.remove("shaking"), 700);
+        burstHearts(4);
+      }
+    },
+    (err) => {
+      console.error("การเชื่อมต่อ realtime ล้มเหลว:", err);
+      clearTimeout(fallbackTimer);
+      if (!gotData && window.LetterStoreLocal) fallbackToLocal();
+    }
+  );
+}
+
+async function boot() {
+  if (window.LetterStore.subscribe) {
+    bootRealtime();
+    return;
+  }
+  // โหมด local: โหลดครั้งเดียว
+  try {
+    allLetters = await window.LetterStore.loadLetters();
+  } catch (e) {
+    console.error("โหลดจดหมายไม่สำเร็จ:", e);
+    allLetters = [];
+  }
+  afterLettersLoaded(true);
 }
 
 if (window.LetterStore) {

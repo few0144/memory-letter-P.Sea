@@ -51,7 +51,7 @@ async function main() {
   const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
   const { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } =
     await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
-  const { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, orderBy, limit, serverTimestamp } =
+  const { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, query, orderBy, limit, serverTimestamp } =
     await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
 
   const app = initializeApp(firebaseConfig);
@@ -122,24 +122,35 @@ async function main() {
       el.authSignedIn.classList.remove("hidden");
       el.authEmail.textContent = "แอดมิน ✅";
       el.adminPanel.classList.remove("hidden");
-      loadLetters();
+      startWatching();
     } else {
       el.authSignedIn.classList.add("hidden");
       el.authSignedOut.classList.remove("hidden");
       el.adminPanel.classList.add("hidden");
+      stopWatching();
     }
   });
 
-  /* ---------- โหลดรายการจดหมาย ---------- */
-  async function loadLetters() {
+  /* ---------- รายการจดหมายแบบ realtime ---------- */
+  let unsubscribe = null;
+
+  function startWatching() {
+    if (unsubscribe) return;
     el.lettersList.innerHTML = `<p class="admin-sub">กำลังโหลด...</p>`;
-    try {
-      const snap = await getDocs(query(lettersCol, orderBy("createdAt", "desc"), limit(500)));
-      renderList(snap.docs);
-    } catch (e) {
-      console.error(e);
-      el.lettersList.innerHTML = "";
-      showError(el.authError, "โหลดจดหมายไม่สำเร็จ: " + (e.code || e.message));
+    unsubscribe = onSnapshot(
+      query(lettersCol, orderBy("createdAt", "desc"), limit(500)),
+      (snap) => renderList(snap.docs),
+      (e) => {
+        console.error(e);
+        showError(el.authError, "โหลดจดหมายไม่สำเร็จ: " + (e.code || e.message));
+      }
+    );
+  }
+
+  function stopWatching() {
+    if (unsubscribe) {
+      unsubscribe();
+      unsubscribe = null;
     }
   }
 
@@ -185,9 +196,7 @@ async function main() {
         if (!confirm(`ลบจดหมาย "${data.title}" จาก ${data.sender}?\n(ลบแล้วกู้คืนไม่ได้)`)) return;
         del.disabled = true;
         try {
-          await deleteDoc(doc(db, "letters", d.id));
-          item.remove();
-          el.letterCount.textContent = String(Number(el.letterCount.textContent) - 1);
+          await deleteDoc(doc(db, "letters", d.id)); // รายการจะอัปเดตเองผ่าน realtime listener
         } catch (e) {
           console.error(e);
           del.disabled = false;
@@ -223,7 +232,7 @@ async function main() {
       el.aSender.value = "";
       el.aTitle.value = "";
       el.aMessage.value = "";
-      loadLetters();
+      // รายการจะอัปเดตเองผ่าน realtime listener
     } catch (e) {
       console.error(e);
       showError(el.addError, "เพิ่มไม่สำเร็จ: " + (e.code || e.message));

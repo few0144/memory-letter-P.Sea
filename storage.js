@@ -55,7 +55,7 @@ const localStore = {
 /* ---------- โหมด cloud: Firebase Firestore ---------- */
 async function makeCloudStore() {
   const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
-  const { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } =
+  const { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, limit, serverTimestamp } =
     await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
 
   const db = getFirestore(initializeApp(firebaseConfig));
@@ -67,6 +67,17 @@ async function makeCloudStore() {
       const snap = await getDocs(query(lettersCol, orderBy("createdAt", "asc"), limit(500)));
       const cloud = snap.docs.map((d) => ({ ...clean(d.data()), id: d.id }));
       return [...BUILTIN, ...cloud];
+    },
+    /* ฟังแบบ realtime: มีจดหมายเพิ่ม/ลบเมื่อไหร่ callback จะถูกเรียกทันที
+       serverAdds = จำนวนฉบับใหม่ที่มาจากเครื่องอื่น (ไม่นับที่เราเขียนเอง) */
+    subscribe(onUpdate, onError) {
+      const q = query(lettersCol, orderBy("createdAt", "asc"), limit(500));
+      return onSnapshot(q, (snap) => {
+        const cloud = snap.docs.map((d) => ({ ...clean(d.data()), id: d.id }));
+        const serverAdds = snap.docChanges()
+          .filter((c) => c.type === "added" && !c.doc.metadata.hasPendingWrites).length;
+        onUpdate([...BUILTIN, ...cloud], serverAdds);
+      }, onError);
     },
     async addLetter(data) {
       const body = clean(data);
