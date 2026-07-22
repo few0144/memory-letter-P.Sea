@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Letter Box 💌</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- หัวใจลอยพื้นหลัง -->
+  <div id="bg-hearts" aria-hidden="true"></div>
+
+  <!-- แถบบน -->
+  <header class="topbar">
+    <h1 class="logo">💌 Memory Letter Box</h1>
+    <div class="topbar-btns">
+      <button id="btn-collection" class="icon-btn" title="สมุดสะสม">📖 <span class="btn-label">สมุดสะสม</span></button>
+      <button id="btn-sound" class="icon-btn" title="เปิด/ปิดเสียง">🔊</button>
+    </div>
+  </header>
+
+  <!-- ========== หน้าหลัก : ตู้ไปรษณีย์ ========== -->
+  <main id="scene-main" class="scene">
+    <p class="tagline">กล่องจดหมายแห่งความทรงจำ ✨<br>กดสุ่มเพื่อเปิดอ่านจดหมายจากคนที่คิดถึงคุณ</p>
+
+    <div class="mailbox-area">
+      <div class="glow-ring" id="glow-ring"></div>
+      <div class="mailbox" id="mailbox">
+        <div class="mailbox-flag"></div>
+        <div class="mailbox-body">
+          <div class="mailbox-slot"></div>
+          <div class="mailbox-face">
+            <span class="mailbox-eye left"></span>
+            <span class="mailbox-eye right"></span>
+            <span class="mailbox-mouth"></span>
+            <span class="mailbox-cheek left"></span>
+            <span class="mailbox-cheek right"></span>
+          </div>
+        </div>
+        <div class="mailbox-post"></div>
+        <div class="mailbox-shadow"></div>
+      </div>
+      <!-- ประกายแสงตอนสุ่ม -->
+      <div class="sparkles" id="sparkles"></div>
+    </div>
+
+    <button id="btn-draw" class="draw-btn" disabled>
+      <span class="draw-btn-icon">🎲</span> สุ่มจดหมาย
+    </button>
+
+    <button id="btn-write" class="write-btn">✍️ เขียนจดหมายหย่อนลงตู้</button>
+
+    <p class="progress" id="progress-text">กำลังเปิดตู้จดหมาย...</p>
+    <p class="mode-note hidden" id="mode-note">📌 โหมดทดลอง: จดหมายที่เขียนจะเก็บไว้ในเครื่องนี้เท่านั้น (ตั้งค่า Firebase เพื่อแชร์ถึงกันทุกเครื่อง — ดูวิธีใน README)</p>
+  </main>
+
+  <!-- ========== ซองจดหมายลอยออกมา ========== -->
+  <div id="scene-envelope" class="overlay hidden">
+    <p class="envelope-hint" id="envelope-hint">แตะซองเพื่อเปิด 👆</p>
+    <div class="envelope" id="envelope" role="button" aria-label="เปิดซองจดหมาย" tabindex="0">
+      <div class="env-back"></div>
+      <div class="env-paper-peek"></div>
+      <div class="env-front"></div>
+      <div class="env-flap"></div>
+      <div class="env-seal">❤️</div>
+    </div>
+  </div>
+
+  <!-- ========== กระดาษจดหมาย ========== -->
+  <div id="scene-letter" class="overlay hidden">
+    <div class="letter-paper" id="letter-paper">
+      <div class="letter-pin">📌</div>
+      <h2 class="letter-title" id="letter-title"></h2>
+      <div class="letter-divider">✿ ✿ ✿</div>
+      <p class="letter-message" id="letter-message"></p>
+      <img class="letter-image hidden" id="letter-image" alt="รูปแนบในจดหมาย">
+      <p class="letter-sender" id="letter-sender"></p>
+      <button class="close-letter-btn" id="btn-close-letter">เก็บเข้าสมุดสะสม 💝</button>
+    </div>
+  </div>
+
+  <!-- ========== สมุดสะสม ========== -->
+  <div id="scene-collection" class="overlay hidden">
+    <div class="collection-book">
+      <div class="collection-head">
+        <h2>📖 สมุดสะสมจดหมาย</h2>
+        <button class="icon-btn" id="btn-close-collection">✖</button>
+      </div>
+      <p class="collection-sub" id="collection-sub"></p>
+      <div class="collection-grid" id="collection-grid"></div>
+      <button class="reset-btn" id="btn-reset">ล้างสมุดสะสม 🗑️</button>
+    </div>
+  </div>
+
+  <!-- ========== เขียนจดหมาย ========== -->
+  <div id="scene-write" class="overlay hidden">
+    <div class="write-card">
+      <div class="collection-head">
+        <h2>✍️ เขียนจดหมาย</h2>
+        <button class="icon-btn" id="btn-close-write">✖</button>
+      </div>
+      <p class="write-sub">เขียนถึงใครสักคน แล้วหย่อนลงตู้<br>ให้คนที่แวะมาได้สุ่มเปิดอ่าน 💌</p>
+      <label class="write-label">จาก (ชื่อผู้ส่ง)
+        <input id="w-sender" class="write-input" maxlength="30" placeholder="เช่น เพื่อนที่คิดถึงเธอ">
+      </label>
+      <label class="write-label">หัวข้อ
+        <input id="w-title" class="write-input" maxlength="50" placeholder="เช่น ถึงคุณที่กำลังเหนื่อย">
+      </label>
+      <label class="write-label">ข้อความ
+        <textarea id="w-message" class="write-input" maxlength="1000" rows="6" placeholder="พิมพ์ข้อความจากใจได้เลย..."></textarea>
+      </label>
+      <p class="write-error hidden" id="write-error"></p>
+      <button id="btn-submit-letter" class="submit-btn">หย่อนลงตู้ 📮</button>
+    </div>
+  </div>
+
+  <!-- Toast แจ้งเตือน -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Confetti -->
+  <div id="confetti-layer" aria-hidden="true"></div>
+
+  <!-- ทางเข้าหน้าแอดมิน -->
+  <a class="admin-link" href="admin.html" title="จัดการจดหมาย (แอดมิน)">⚙️</a>
+
+  <script src="letters.js"></script>
+  <script src="firebase-config.js"></script>
+  <script type="module" src="storage.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

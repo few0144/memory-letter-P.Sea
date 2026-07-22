@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200">
+  <rect width="300" height="200" rx="16" fill="#ffd6e0"/>
+  <ellipse cx="150" cy="130" rx="60" ry="45" fill="#fff"/>
+  <circle cx="150" cy="85" r="42" fill="#fff"/>
+  <path d="M118 60 L110 30 L138 48 Z" fill="#fff" stroke="#f76d8e" stroke-width="3"/>
+  <path d="M182 60 L190 30 L162 48 Z" fill="#fff" stroke="#f76d8e" stroke-width="3"/>
+  <circle cx="136" cy="82" r="5" fill="#6b4a4f"/>
+  <circle cx="164" cy="82" r="5" fill="#6b4a4f"/>
+  <path d="M144 96 Q150 102 156 96" stroke="#6b4a4f" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <ellipse cx="124" cy="93" rx="7" ry="4" fill="#ff9db8"/>
+  <ellipse cx="176" cy="93" rx="7" ry="4" fill="#ff9db8"/>
+  <text x="150" y="188" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#c73e50">meow ♪</text>
+</svg>

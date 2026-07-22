@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200">
+  <rect width="300" height="200" rx="16" fill="#fff6ec"/>
+  <path d="M150 160 C 60 100, 90 30, 150 70 C 210 30, 240 100, 150 160 Z" fill="#f76d8e"/>
+  <path d="M150 160 C 60 100, 90 30, 150 70 C 210 30, 240 100, 150 160 Z" fill="none" stroke="#e94f5f" stroke-width="5"/>
+  <circle cx="120" cy="75" r="10" fill="#ffd6e0" opacity=".9"/>
+  <text x="150" y="188" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#a3787f">with love ♡</text>
+</svg>

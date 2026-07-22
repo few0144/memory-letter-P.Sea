@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200">
+  <rect width="300" height="200" rx="16" fill="#fff6ec"/>
+  <rect x="40" y="30" width="220" height="140" rx="8" fill="#fff" stroke="#ffd6e0" stroke-width="6"/>
+  <circle cx="110" cy="90" r="26" fill="#ff9db8"/>
+  <circle cx="190" cy="90" r="26" fill="#f76d8e"/>
+  <circle cx="102" cy="86" r="4" fill="#6b4a4f"/>
+  <circle cx="118" cy="86" r="4" fill="#6b4a4f"/>
+  <path d="M102 98 Q110 106 118 98" stroke="#6b4a4f" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="182" cy="86" r="4" fill="#6b4a4f"/>
+  <circle cx="198" cy="86" r="4" fill="#6b4a4f"/>
+  <path d="M182 98 Q190 106 198 98" stroke="#6b4a4f" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M136 132 C 130 120, 145 114, 150 124 C 155 114, 170 120, 164 132 C 158 142, 150 146, 150 146 C 150 146, 142 142, 136 132 Z" fill="#e94f5f"/>
+  <text x="150" y="160" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#a3787f">best friends forever</text>
+</svg>

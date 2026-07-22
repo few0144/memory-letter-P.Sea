@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จัดการจดหมาย ⚙️ | Memory Letter Box</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <h1 class="logo">⚙️ จัดการจดหมาย</h1>
+    <div class="topbar-btns">
+      <a href="index.html" class="icon-btn" style="text-decoration:none">🏠 <span class="btn-label">กลับหน้าเว็บ</span></a>
+    </div>
+  </header>
+
+  <main class="admin-wrap">
+
+    <!-- ยังไม่ได้ตั้งค่า Firebase -->
+    <section id="not-configured" class="admin-card hidden">
+      <h2>ยังไม่ได้ตั้งค่า Firebase 🔥</h2>
+      <p class="admin-sub">หน้าแอดมินใช้จัดการจดหมายบนคลาวด์เท่านั้น<br>วางค่า config ในไฟล์ <code>firebase-config.js</code> ก่อน (ดูวิธีใน README.md)</p>
+    </section>
+
+    <!-- กล่องล็อกอิน -->
+    <section id="auth-box" class="admin-card hidden">
+      <div id="auth-loading">กำลังตรวจสอบสถานะ...</div>
+
+      <div id="auth-signedout" class="hidden">
+        <h2>เข้าสู่ระบบแอดมิน</h2>
+        <p class="admin-sub">ใส่รหัสผ่านแอดมินเพื่อจัดการจดหมาย<br>(ครั้งแรกสุด รหัสที่ใส่จะถูกตั้งเป็นรหัสแอดมินอัตโนมัติ — ขั้นต่ำ 6 ตัว)</p>
+        <label class="write-label">รหัสผ่าน
+          <input id="admin-pass" class="write-input" type="password" placeholder="••••••" autocomplete="current-password">
+        </label>
+        <button id="btn-login" class="submit-btn">🔐 เข้าสู่ระบบ</button>
+      </div>
+
+      <div id="auth-signedin" class="hidden">
+        <p>ล็อกอินเป็น <strong id="auth-email"></strong></p>
+        <button id="btn-logout" class="reset-btn">ออกจากระบบ</button>
+      </div>
+
+      <p id="auth-error" class="write-error hidden"></p>
+    </section>
+
+    <!-- แผงจัดการ (แสดงหลังล็อกอิน) -->
+    <section id="admin-panel" class="hidden">
+
+      <div class="admin-card">
+        <h2>➕ เพิ่มจดหมายลงตู้</h2>
+        <label class="write-label">จาก (ชื่อผู้ส่ง)
+          <input id="a-sender" class="write-input" maxlength="30">
+        </label>
+        <label class="write-label">หัวข้อ
+          <input id="a-title" class="write-input" maxlength="50">
+        </label>
+        <label class="write-label">ข้อความ
+          <textarea id="a-message" class="write-input" maxlength="1000" rows="5"></textarea>
+        </label>
+        <p id="add-error" class="write-error hidden"></p>
+        <button id="btn-add" class="submit-btn">เพิ่มจดหมาย 📮</button>
+      </div>
+
+      <div class="admin-card">
+        <h2>📬 จดหมายบนคลาวด์ (<span id="letter-count">0</span> ฉบับ)</h2>
+        <p class="admin-sub">กด 🗑️ เพื่อลบจดหมายที่ไม่เหมาะสม (ลบแล้วกู้คืนไม่ได้)<br>
+        📎 จดหมายตั้งต้นในไฟล์ <code>letters.js</code> ไม่แสดงที่นี่ — แก้ในไฟล์โดยตรง</p>
+        <div id="letters-list" class="admin-list"></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="firebase-config.js"></script>
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
