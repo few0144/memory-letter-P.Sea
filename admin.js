@@ -117,7 +117,9 @@ async function main() {
   onAuthStateChanged(auth, (user) => {
     el.authLoading.classList.add("hidden");
     el.authError.classList.add("hidden");
-    if (user) {
+    // นับเป็นแอดมินเฉพาะบัญชี ADMIN_EMAIL เท่านั้น
+    // (ถ้าล็อกอินเป็นรหัสตู้/บัญชีอื่นอยู่ ให้ใส่รหัสแอดมินใหม่ตรงนี้)
+    if (user && user.email === ADMIN_EMAIL) {
       el.authSignedOut.classList.add("hidden");
       el.authSignedIn.classList.remove("hidden");
       el.authEmail.textContent = "แอดมิน ✅";

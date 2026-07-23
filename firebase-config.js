@@ -20,9 +20,12 @@
    };
    ================================================================ */
 
-/* อีเมลประจำบัญชีแอดมิน (เป็นอีเมลสมมติ ใช้จับคู่กับรหัสผ่านเท่านั้น)
-   ต้องตรงกับ: บัญชีที่สร้างใน Authentication → Users และอีเมลใน Security Rules */
+/* อีเมลประจำบัญชีภายใน (เป็นอีเมลสมมติ ใช้จับคู่กับรหัสผ่านเท่านั้น ไม่ต้องไปยุ่ง)
+   ADMIN_EMAIL  = รหัสแอดมิน (เพิ่ม/ลบจดหมายในหน้า admin.html)
+   READER_EMAIL = รหัสตู้ (ใส่ก่อนสุ่มเปิดอ่านจดหมายในหน้าแรก)
+   ทั้งคู่ต้องตรงกับอีเมลใน Security Rules */
 const ADMIN_EMAIL = "admin@memoryletterbox.app";
+const READER_EMAIL = "reader@memoryletterbox.app";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCOzmGche1DI4m3nXXoOacn5Gks88teRjg",
