@@ -40,8 +40,13 @@ service cloud.firestore {
       return request.auth != null
         && request.auth.token.email == 'admin@memoryletterbox.app';
     }
+    // คนที่ใส่รหัสตู้ (หรือแอดมิน) เท่านั้นที่อ่านจดหมายได้
+    function canRead() {
+      return request.auth != null
+        && request.auth.token.email in ['admin@memoryletterbox.app', 'reader@memoryletterbox.app'];
+    }
     match /letters/{id} {
-      allow read: if true;
+      allow read: if canRead();
       allow create: if isAdmin() || (
         request.resource.data.keys().hasOnly(['sender', 'title', 'message', 'createdAt'])
         && request.resource.data.sender is string
@@ -60,6 +65,18 @@ service cloud.firestore {
 ```
 
 > 💡 ค่า `firebaseConfig` เป็นข้อมูลสาธารณะโดยออกแบบ (ไม่ใช่รหัสลับ) — ความปลอดภัยอยู่ที่ Rules ด้านบน
+
+## 🔒 รหัสของตู้ (ใส่ก่อนสุ่มเปิดอ่าน)
+
+- **เขียนจดหมาย**: ใครก็หย่อนลงตู้ได้ ไม่ต้องใช้รหัส
+- **สุ่มเปิดอ่าน / สมุดสะสม**: ต้องใส่ "รหัสของตู้" ก่อน (ใส่ครั้งเดียว เครื่องนั้นจำไว้ตลอด)
+- บังคับที่ฝั่งเซิร์ฟเวอร์: คนไม่มีรหัสดึงข้อมูลจดหมายไม่ได้เลย ต่อให้แก้โค้ด
+
+**ตั้งรหัสตู้ครั้งแรก:** หลังเปิดสวิตช์ Email/Password แล้ว เปิดหน้าเว็บ → กด "สุ่มจดหมาย" → พิมพ์รหัสที่อยากใช้ (ขั้นต่ำ 6 ตัว) → รหัสนั้นถูกตั้งเป็นรหัสประจำตู้ทันที ⚠️ รีบตั้งก่อนแชร์ลิงก์ เพราะคนแรกที่ตั้งได้เป็นคนกำหนดรหัส
+
+**ลืม/เปลี่ยนรหัสตู้:** Firebase Console → Authentication → Users → ลบแถว `reader@memoryletterbox.app` → กลับไปตั้งใหม่ในหน้าเว็บ
+
+> รหัสตู้ (`reader@...`) กับรหัสแอดมิน (`admin@...`) เป็นคนละรหัสกัน — แชร์รหัสตู้ให้เพื่อนได้ โดยเพื่อนยังลบจดหมายไม่ได้
 
 ## ⚙️ หน้าแอดมิน (เพิ่ม/ลบจดหมาย)
 
